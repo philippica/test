@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>电影院排座</title>
+</head>
+<body>
+  <label for="n">总共排数</label>
+  <input type="number" id="n" name="n" value="9" onchange="generateGrid()"><br>
+
+  <label for="m">总共列数</label>
+  <input type="number" id="m" name="m" value="9" onchange="generateGrid()"><br>
+  
+  <label for="aislecol">过道列数（竖） 用空格隔开</label>
+  <input id="aislecol" name="aislecol" value="2 6" onchange="generateGrid()"><br>
+
+  <label for="aisleRow">过道排数（横） 用空格隔开</label>
+  <input id="aisleRow" name="aisleRow" value="3" onchange="generateGrid()"><br>
+
+
+  <svg id="my-svg" width="50%" height="500px"></svg>
+</body>
+  <script>
+    function generateNode(svg, position, size, gapRow, gapCol) {
+      var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", position.x + gapRow / 2);
+      rect.setAttribute("y", position.y + gapCol / 2);
+      rect.setAttribute("width", size.width - gapRow);
+      rect.setAttribute("height", size.height );
+      rect.setAttribute("rx", 10);
+      rect.setAttribute("stroke-width", 3);
+      rect.setAttribute("stroke", "black");
+      rect.setAttribute("fill", "gray");
+      svg.appendChild(rect);
+    }
+
+    function generateGrid() {
+      var svg = document.getElementById("my-svg");
+      var n = parseInt(document.getElementById("n").value);
+      var m = parseInt(document.getElementById("m").value);
+      var aislecol = document.getElementById("aislecol").value.split(" ").map(x=>parseInt(x));
+      var aisleRow = parseInt(document.getElementById("aisleRow").value)-1;
+      var width = svg.getBoundingClientRect().width;
+      var height = svg.getBoundingClientRect().height;
+      var rectWidth = 50;
+      var rectHeight = 50;
+      var marginLeft = 20;
+      var marginRight = 20;
+      var gapRow = 2;
+      var gapCol = 20;
+
+      // Clear the SVG element before generating the grid
+      while (svg.firstChild) {
+        svg.removeChild(svg.firstChild);
+      }
+      
+      let farRight = 0;
+      let farBottom = 0;
+
+      for (var i = 0; i < n; i++) {
+        for (var j = 0; j < m; j++) {
+          var position = { x: marginLeft + i * (rectWidth + gapRow), y: marginRight+j * (rectHeight + gapCol) };
+          let index = 0;
+          while(index < aislecol.length && i > aislecol[index]) {
+            position.x += 30;
+            index++;
+          }
+          if(j > aisleRow) {
+            position.y += 30;
+          }
+          var size = { width: rectWidth, height: rectHeight };
+          generateNode(svg, position, size, gapRow, gapCol);
+          farRight = Math.max(farRight, position.x + rectWidth + marginLeft);
+          farBottom = Math.max(farBottom, position.y + rectHeight + marginRight);
+        }
+      }
+      svg.style.width = farRight;
+      svg.style.height = farBottom;
+      
+    }
+    generateGrid()
+  </script>
+</html>
