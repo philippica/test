@@ -20,6 +20,7 @@
   <svg id="my-svg" width="50%" height="500px"></svg>
 </body>
   <script>
+    let selectedSeat;
     function generateNode(svg, position, size, gapRow, gapCol) {
       var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       rect.setAttribute("x", position.x + gapRow / 2);
@@ -30,6 +31,15 @@
       rect.setAttribute("stroke-width", 3);
       rect.setAttribute("stroke", "black");
       rect.setAttribute("fill", "gray");
+      rect.onclick = (e) => {
+        const ele = e.target;
+        ele.setAttribute("stroke", "#ed9393");
+        if(selectedSeat){
+            selectedSeat.setAttribute("stroke", "black");
+        }
+
+        selectedSeat = e.target;
+      }
       svg.appendChild(rect);
     }
 
@@ -37,8 +47,8 @@
       var svg = document.getElementById("my-svg");
       var n = parseInt(document.getElementById("n").value);
       var m = parseInt(document.getElementById("m").value);
-      var aislecol = document.getElementById("aislecol").value.split(" ").map(x=>parseInt(x));
-      var aisleRow = parseInt(document.getElementById("aisleRow").value)-1;
+      var aislecol = document.getElementById("aislecol").value.split(" ").map(x=>parseInt(x)-1);
+      var aisleRow = document.getElementById("aisleRow").value.split(" ").map(x=>parseInt(x)-1);;
       var width = svg.getBoundingClientRect().width;
       var height = svg.getBoundingClientRect().height;
       var rectWidth = 50;
@@ -64,9 +74,12 @@
             position.x += 30;
             index++;
           }
-          if(j > aisleRow) {
+          index = 0;
+          while(index < aisleRow.length && j > aisleRow[index]) {
             position.y += 30;
+            index++;
           }
+
           var size = { width: rectWidth, height: rectHeight };
           generateNode(svg, position, size, gapRow, gapCol);
           farRight = Math.max(farRight, position.x + rectWidth + marginLeft);
@@ -77,6 +90,12 @@
       svg.style.height = farBottom;
       
     }
+    
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Delete' || event.keyCode === 46 && selectedSeat) {
+        selectedSeat.remove();
+      }
+    });
     generateGrid()
   </script>
 </html>
