@@ -2,100 +2,58 @@
 <html>
 <head>
   <title>电影院排座</title>
+  <style>
+    text {
+        font-size: small;
+    }
+  </style>
 </head>
 <body>
   <label for="n">总共排数</label>
-  <input type="number" id="n" name="n" value="9" onchange="generateGrid()"><br>
+  <input type="number" id="n" name="n" value="9" oninput="generateGrid()"><br>
 
   <label for="m">总共列数</label>
-  <input type="number" id="m" name="m" value="9" onchange="generateGrid()"><br>
+  <input type="number" id="m" name="m" value="9" oninput="generateGrid()"><br>
   
   <label for="aislecol">过道列数（竖） 用空格隔开</label>
-  <input id="aislecol" name="aislecol" value="2 6" onchange="generateGrid()"><br>
+  <input id="aislecol" name="aislecol" value="2 6" oninput="generateGrid()"><br>
 
   <label for="aisleRow">过道排数（横） 用空格隔开</label>
-  <input id="aisleRow" name="aisleRow" value="3" onchange="generateGrid()"><br>
+  <input id="aisleRow" name="aisleRow" value="3" oninput="generateGrid()"><br>
+  <div>选中目标后按ctrl + C复制， 再选中另一个目标ctrl + V可以复制全部信息哦~~</div>
 
+  <div style="display:flex">
+    <svg id="my-svg" width="50%" height="500px"></svg>
+    <div>
+        <div>选中座位名字：</div>
+        <textarea id="seatName" oninput="editName()"></textarea>
+        <div>选中座位颜色：</div>
+        <div style="display:flex; width: 200px; margin: 10px;flex-wrap: wrap;">
+            <div style="width: 20px; height: 20px; background-color: #c5c3c3a3; margin:5px" onclick="pickcolor(e)"></div>
+            
+            <div style="width: 20px;height: 20px;background-color: #f47070;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #fec780;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #ffd000;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #bff48b;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #7af2aa;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #6281f1;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #ea68f2;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #c39b9b;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #4f4334;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #c1ba9a;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #bbd1a4;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #c5f4d7;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #b0bff5;margin:5px" onclick="pickcolor(this)"></div>
+            <div style="width: 20px;height: 20px;background-color: #e9b6ec;margin:5px" onclick="pickcolor(this)"></div>
 
-  <svg id="my-svg" width="50%" height="500px"></svg>
+        </div>
+        <div>选中座位附加信息：</div>
+        <textarea id="appendInfo" oninput="editAppend()" style="height: 100px"></textarea>
+    </div>
+  </div>
 </body>
   <script>
-    let selectedSeat;
-    function generateNode(svg, position, size, gapRow, gapCol) {
-      var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-      rect.setAttribute("x", position.x + gapRow / 2);
-      rect.setAttribute("y", position.y + gapCol / 2);
-      rect.setAttribute("width", size.width - gapRow);
-      rect.setAttribute("height", size.height );
-      rect.setAttribute("rx", 10);
-      rect.setAttribute("stroke-width", 3);
-      rect.setAttribute("stroke", "black");
-      rect.setAttribute("fill", "gray");
-      rect.onclick = (e) => {
-        const ele = e.target;
-        ele.setAttribute("stroke", "#ed9393");
-        if(selectedSeat){
-            selectedSeat.setAttribute("stroke", "black");
-        }
+let selectedSeat,copyedSeat;const editName=()=>{let e=document.getElementById("seatName").value;if(!selectedSeat)return;let t=selectedSeat.getAttribute("name"),l=document.getElementsByName(t);var r=l[1].getBBox(),i=r.width;l[1].innerHTML=e,r=l[1].getBBox().width;let a=parseFloat(l[1].getAttribute("x"));l[1].setAttribute("x",a+i/2-r/2)},editAppend=()=>{let e=document.getElementById("appendInfo").value;if(!selectedSeat)return;let t=selectedSeat.getAttribute("name"),l=document.getElementsByName(`t${t}`);l[0].innerHTML=e},pickcolor=e=>{if(console.info(e.style.backgroundColor),!selectedSeat)return;let t=selectedSeat.getAttribute("name"),l=document.getElementsByName(t);l[0].setAttribute("fill",e.style.backgroundColor)};function generateRow(e,t,l){var r=document.createElementNS("http://www.w3.org/2000/svg","text");r.textContent=l,r.setAttribute("x",t.x),r.setAttribute("y",t.y),e.appendChild(r)}function generateNode(e,t,l,r,i,a,n){var s=document.createElementNS("http://www.w3.org/2000/svg","rect");s.setAttribute("x",t.x+r/2),s.setAttribute("y",t.y+i/2),s.setAttribute("width",l.width-r),s.setAttribute("height",l.height),s.setAttribute("rx",10),s.setAttribute("name",`r${a}c${n}`),s.setAttribute("stroke-width",3),s.setAttribute("stroke","black"),s.setAttribute("fill","#c5c3c3a3");let d=e=>{e.target,selectedSeat&&selectedSeat.setAttribute("stroke","black"),selectedSeat=e.target;let t=selectedSeat.getAttribute("name"),l=document.getElementsByName(t),r=document.getElementById("seatName");selectedSeat=l[0],r.value=l[1].innerHTML,selectedSeat.setAttribute("stroke","#ed9393");let i=document.getElementsByName(`t${selectedSeat.getAttribute("name")}`),a=document.getElementById("appendInfo");a.value=i[0].innerHTML};s.onclick=d;var g=document.createElementNS("http://www.w3.org/2000/svg","title");g.setAttribute("name",`tr${a}c${n}`),s.appendChild(g),e.appendChild(s);var o=document.createElementNS("http://www.w3.org/2000/svg","text");o.setAttribute("name",`r${a}c${n}`),o.onclick=d,o.textContent="",o.setAttribute("x",t.x+r/2),o.setAttribute("y",t.y+i/2+l.height/2),e.appendChild(o);var c=o.getBBox().width;o.setAttribute("x",t.x+r/2+l.width/2-c/2)}function generateGrid(){var e=document.getElementById("my-svg"),t=parseInt(document.getElementById("n").value),l=parseInt(document.getElementById("m").value),r=document.getElementById("aislecol").value.split(" ").map(e=>parseInt(e)-1),i=document.getElementById("aisleRow").value.split(" ").map(e=>parseInt(e)-1);for(e.getBoundingClientRect().width,e.getBoundingClientRect().height;e.firstChild;)e.removeChild(e.firstChild);let a=0,n=0;for(var s=0;s<t;s++)for(var d=0;d<l;d++){var g={x:100+52*s,y:100+60*d};let o=0;for(;o<r.length&&s>r[o];)g.x+=30,o++;for(o=0;o<i.length&&d>i[o];)g.y+=30,o++;generateNode(e,g,{width:50,height:50},2,10,s,d),a=Math.max(a,g.x+50+100),n=Math.max(n,g.y+50+100)}for(let c=0;c<l;c++){let $={x:5,y:100+60*c+100/3},u=0;for(;u<i.length&&c>i[u];)$.y+=30,u++;generateRow(e,$,`第${t-c}排`)}e.style.width=a,e.style.height=n}document.addEventListener("keydown",function(e){var t=e.which||e.keyCode,l=e.ctrlKey?e.ctrlKey:17===t;if(("Delete"===e.key||46===e.keyCode&&selectedSeat)&&(selectedSeat.remove(),selectedSeat=void 0),86==t&&l){if(console.log("Ctrl+V is pressed."),!copyedSeat||!selectedSeat)return;let r=document.getElementsByName(copyedSeat.getAttribute("name")),i=document.getElementsByName(selectedSeat.getAttribute("name"));i[0].style.color=r[0].style.color,i[0].setAttribute("fill",r[0].getAttribute("fill"));var a=i[1].getBBox(),n=a.width;i[1].innerHTML=r[1].innerHTML,a=i[1].getBBox().width;let s=parseFloat(i[1].getAttribute("x"));i[1].setAttribute("x",s+n/2-a/2),i[0].firstChild.innerHTML=r[0].firstChild.innerHTML}else if(67==t&&l){if(!selectedSeat)return;copyedSeat=selectedSeat}}),generateGrid();
 
-        selectedSeat = e.target;
-      }
-      svg.appendChild(rect);
-    }
-
-    function generateGrid() {
-      var svg = document.getElementById("my-svg");
-      var n = parseInt(document.getElementById("n").value);
-      var m = parseInt(document.getElementById("m").value);
-      var aislecol = document.getElementById("aislecol").value.split(" ").map(x=>parseInt(x)-1);
-      var aisleRow = document.getElementById("aisleRow").value.split(" ").map(x=>parseInt(x)-1);;
-      var width = svg.getBoundingClientRect().width;
-      var height = svg.getBoundingClientRect().height;
-      var rectWidth = 50;
-      var rectHeight = 50;
-      var marginLeft = 20;
-      var marginRight = 20;
-      var gapRow = 2;
-      var gapCol = 20;
-
-      // Clear the SVG element before generating the grid
-      while (svg.firstChild) {
-        svg.removeChild(svg.firstChild);
-      }
-      
-      let farRight = 0;
-      let farBottom = 0;
-
-      for (var i = 0; i < n; i++) {
-        for (var j = 0; j < m; j++) {
-          var position = { x: marginLeft + i * (rectWidth + gapRow), y: marginRight+j * (rectHeight + gapCol) };
-          let index = 0;
-          while(index < aislecol.length && i > aislecol[index]) {
-            position.x += 30;
-            index++;
-          }
-          index = 0;
-          while(index < aisleRow.length && j > aisleRow[index]) {
-            position.y += 30;
-            index++;
-          }
-
-          var size = { width: rectWidth, height: rectHeight };
-          generateNode(svg, position, size, gapRow, gapCol);
-          farRight = Math.max(farRight, position.x + rectWidth + marginLeft);
-          farBottom = Math.max(farBottom, position.y + rectHeight + marginRight);
-        }
-      }
-      svg.style.width = farRight;
-      svg.style.height = farBottom;
-      
-    }
-    
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Delete' || event.keyCode === 46 && selectedSeat) {
-        selectedSeat.remove();
-      }
-    });
-    generateGrid()
   </script>
 </html>
