@@ -51,7 +51,8 @@
 
   <button onclick="save()">保存结果</button>
   <button onclick="generateExcel()">生成excel（看分布）</button>
-  <button onclick="generateExcel2()">生成excel(看座位号)</button>
+  <button onclick="generateExcel2()">生成excel(看座位号,横排座位号正序)</button>
+  <button onclick="generateExcel3()">生成excel(看座位号,横排座位号逆序)</button>
 
   <div style="display:flex">
     <div id='container'>
@@ -617,6 +618,43 @@
       var link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
       link.download = `${cinimaName}_${timeName}(看座位号).xlsx`;
+      link.click();
+    }
+
+    const generateExcel3 = () => {
+      let data = [];
+      const firstline = [""];
+      data.push(firstline);
+      const n = document.getElementById("n").value;
+      const m = document.getElementById("m").value;
+      for(let i = 0; i < n; i++) {
+        firstline.push(n-i);
+      }
+      for(let i = 0; i < m; i++) {
+        let line = [];
+        let space = 0;
+        for(let j = 0; j < n; j++) {
+          const seat = document.getElementsByName(`r${j}c${i}`);
+          if(seat.length < 2) {
+            space++;
+            continue;
+          }
+          line.push(seat[1].textContent);
+        }
+        for(let s = 0; s < space; s++) {
+          line.unshift('');
+        }
+        line.unshift(`第${i+1}排`);
+        data.push(line);
+      }
+      var workbook = XLSX.utils.book_new();
+      var worksheet = XLSX.utils.aoa_to_sheet(data);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      var excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      var blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${cinimaName}_${timeName}(看座位号,逆序).xlsx`;
       link.click();
     }
   </script>
