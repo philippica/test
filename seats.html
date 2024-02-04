@@ -50,7 +50,8 @@
 
 
   <button onclick="save()">保存结果</button>
-  <button onclick="generateExcel()">生成excel</button>
+  <button onclick="generateExcel()">生成excel（看分布）</button>
+  <button onclick="generateExcel2()">生成excel(看座位号)</button>
 
   <div style="display:flex">
     <div id='container'>
@@ -565,9 +566,6 @@
       data.push(firstline);
       const n = document.getElementById("n").value;
       const m = document.getElementById("m").value;
-      for(let i = 0; i < n; i++) {
-        firstline.push(i+1);
-      }
       for(let i = 0; i < m; i++) {
         let line = [`第${i+1}排`];
         for(let j = 0; j < n; j++) {
@@ -587,7 +585,38 @@
       var blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
       var link = document.createElement("a");
       link.href = URL.createObjectURL(blob);
-      link.download = `${cinimaName}_${timeName}.xlsx`;
+      link.download = `${cinimaName}_${timeName}(看分布).xlsx`;
+      link.click();
+    }
+
+    const generateExcel2 = () => {
+      let data = [];
+      const firstline = [""];
+      data.push(firstline);
+      const n = document.getElementById("n").value;
+      const m = document.getElementById("m").value;
+      for(let i = 0; i < n; i++) {
+        firstline.push(i+1);
+      }
+      for(let i = 0; i < m; i++) {
+        let line = [`第${i+1}排`];
+        for(let j = 0; j < n; j++) {
+          const seat = document.getElementsByName(`r${j}c${i}`);
+          if(seat.length < 2) {
+            continue;
+          }
+          line.push(seat[1].textContent);
+        }
+        data.push(line);
+      }
+      var workbook = XLSX.utils.book_new();
+      var worksheet = XLSX.utils.aoa_to_sheet(data);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      var excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      var blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${cinimaName}_${timeName}(看座位号).xlsx`;
       link.click();
     }
   </script>
