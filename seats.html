@@ -2,6 +2,9 @@
 <html>
 <head>
   <title>电影院排座</title>
+  <script lang="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.2/xlsx.full.min.js"></script>
+<script lang="javascript" src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.8/FileSaver.min.js"></script>  </head>
+
   <style>
     text {
         font-size: small;
@@ -45,6 +48,7 @@
 
 
   <button onclick="save()">保存结果</button>
+  <button onclick="generateExcel()">生成excel</button>
 
   <div style="display:flex">
     <div id='container'>
@@ -79,7 +83,505 @@
   </div>
 </body>
   <script>
-let selectedSeat=[],copyedSeat,cinimaName="未命名包厢",timeName="未命名时刻",multiSelect=!1,storedCinemas={};const deleteRoom=()=>{let e=[];for(var t=0;t<localStorage.length;t++){let l=localStorage.key(t);l.startsWith(`${cinimaName}_z_`)&&e.push(l)}for(var t=0;t<localStorage.length;t++){let n=localStorage.key(t);n.startsWith(`${cinimaName}_p_`)&&e.push(n)}for(let i of e)localStorage.removeItem(i);location.reload()},deletetime=()=>{localStorage.removeItem(`${cinimaName}_z_${timeName}`);let e=!1;for(var t=0;t<localStorage.length;t++){let l=localStorage.key(t);if(l.startsWith(`${cinimaName}_z_`)){e=!0;break}}!1===e&&(localStorage.removeItem(`${cinimaName}_p_n`),localStorage.removeItem(`${cinimaName}_p_m`),localStorage.removeItem(`${cinimaName}_p_row`),localStorage.removeItem(`${cinimaName}_p_col`)),alert("删除成功"),location.reload()},onClick=e=>{e.target;let t=document.getElementById("appendInfo"),l=document.getElementById("seatName");if(multiSelect){let n=e.target.getAttribute("name"),i=document.getElementsByName(n);if(selectedSeat.push(i[0]),i[0].setAttribute("stroke","#ed9393"),selectedSeat.length>1)t.value="",l.value="";else{let a=document.getElementsByName(`t${selectedSeat[0].getAttribute("name")}`);t.value=a[0].innerHTML,l.value=i[1].innerHTML}return}let m=document.getElementById("my-svg").getElementsByTagName("rect");for(let r of m)r.setAttribute("stroke","black");selectedSeat=[e.target];let o=selectedSeat[0].getAttribute("name"),s=document.getElementsByName(o);selectedSeat=[s[0]],l.value=s[1].innerHTML,selectedSeat[0].setAttribute("stroke","#ed9393");let c=document.getElementsByName(`t${selectedSeat[0].getAttribute("name")}`);t.value=c[0].innerHTML},generateTimeline=()=>{let e=document.getElementById("timeline").value,t=document.getElementById("timeSelect");t.options[t.selectedIndex].innerHTML=e,localStorage.removeItem(`${cinimaName}_z_${timeName}`),timeName=e,save()},generateRoom=()=>{let e=document.getElementById("room").value,t=document.getElementById("roomSelect");t.options[t.selectedIndex].innerHTML=e;let l=[];for(var n=0;n<localStorage.length;n++){let i=localStorage.key(n),a=localStorage.getItem(i);if(i.startsWith(`${cinimaName}_z_`)){l.push(i);let m=i.split("_z_");localStorage.setItem(`${e}_z_${m[1]}`,a)}if(i.startsWith(`${cinimaName}_p_`)){l.push(i);let r=i.split("_p_");localStorage.setItem(`${e}_p_${r[1]}`,a)}}for(let o of l)localStorage.removeItem(o);cinimaName=e,save()},save=()=>{let e=document.getElementById("my-svg").getElementsByTagName("rect");for(let t of e)t.setAttribute("stroke","black");window.localStorage.setItem(`${cinimaName}_p_n`,document.getElementById("n").value),window.localStorage.setItem(`${cinimaName}_p_row`,document.getElementById("aisleRow").value),window.localStorage.setItem(`${cinimaName}_p_m`,document.getElementById("m").value),window.localStorage.setItem(`${cinimaName}_p_col`,document.getElementById("aislecol").value),window.localStorage.setItem(`${cinimaName}_z_${timeName}`,document.getElementById("container").innerHTML),alert("保存成功")},recover=e=>{document.getElementById("container").innerHTML=window.localStorage.getItem(e),setInterval(()=>{let e=document.getElementById("my-svg").getElementsByTagName("rect");for(let t of e)t.onclick=onClick;let l=document.getElementById("my-svg").getElementsByTagName("text");for(let n of l)n.innerHTML&&"第"==n.innerHTML[0]||(n.onclick=onClick)},500)},onchangeRoom=e=>{let t=e.options[e.selectedIndex].innerHTML;if(save(),cinimaName=t,document.getElementById("room").value=t,"新建包厢"==t){e.selectedIndex;let l=`未命名包厢${e.options.length}`;document.getElementById("room").value=l,cinimaName=l;let n=document.getElementById("my-svg").getElementsByTagName("rect");for(let i of n)i.setAttribute("fill","#c5c3c3a3"),i.firstChild.innerHTML="";let a=document.getElementById("my-svg").getElementsByTagName("text");for(let m of a)m.innerHTML&&"第"==m.innerHTML[0]||(m.innerHTML="");timeName="未命名时刻",document.getElementById("roomSelect").value=l,e.innerHTML=`<option>${l}</option>`+e.innerHTML,e.selectedIndex=0;let r=document.getElementById("timeSelect");r.innerHTML="<option>未命名时刻</option><option>新建时刻</option>",document.getElementById("timeline").value=timeName;return}recoverFull(!1)},onchangetime=e=>{let t=e.options[e.selectedIndex].innerHTML;if(save(),"新建时刻"==t){let l=e.selectedIndex;e.options[e.selectedIndex].innerHTML=`未命名时刻${e.options.length}`;let n=document.getElementById("my-svg").getElementsByTagName("rect");for(let i of n)i.setAttribute("fill","#c5c3c3a3"),i.firstChild.innerHTML="";let a=document.getElementById("my-svg").getElementsByTagName("text");for(let m of a)m.innerHTML&&"第"==m.innerHTML[0]||(m.innerHTML="");timeName=e.options[e.selectedIndex].innerHTML,document.getElementById("timeline").value=e.options[e.selectedIndex].innerHTML,e.innerHTML+=`<option>新建时刻</option>`,e.selectedIndex=l;return}timeName=e.options[e.selectedIndex].innerHTML,document.getElementById("timeline").value=e.options[e.selectedIndex].innerHTML,recover(`${cinimaName}_z_${t}`)},editName=()=>{let e=document.getElementById("seatName").value;if(0!==selectedSeat.length)for(let t of selectedSeat){let l=t.getAttribute("name"),n=document.getElementsByName(l);var i=n[1].getBBox(),a=i.width;n[1].innerHTML=e,i=n[1].getBBox().width;let m=parseFloat(n[1].getAttribute("x"));n[1].setAttribute("x",m+a/2-i/2)}},editAppend=()=>{let e=document.getElementById("appendInfo").value;if(0!==selectedSeat.length)for(let t of selectedSeat){let l=t.getAttribute("name"),n=document.getElementsByName(`t${l}`);n[0].innerHTML=e}},pickcolor=e=>{if(console.info(e.style.backgroundColor),0!==selectedSeat.length)for(let t of selectedSeat){let l=t.getAttribute("name"),n=document.getElementsByName(l);n[0].setAttribute("fill",e.style.backgroundColor)}};function generateRow(e,t,l){var n=document.createElementNS("http://www.w3.org/2000/svg","text");n.textContent=l,n.setAttribute("x",t.x),n.setAttribute("y",t.y),e.appendChild(n)}function generateNode(e,t,l,n,i,a,m){var r=document.createElementNS("http://www.w3.org/2000/svg","rect");r.setAttribute("x",t.x+n/2),r.setAttribute("y",t.y+i/2),r.setAttribute("width",l.width-n),r.setAttribute("height",l.height),r.setAttribute("rx",10),r.setAttribute("name",`r${a}c${m}`),r.setAttribute("stroke-width",3),r.setAttribute("stroke","black"),r.setAttribute("fill","#c5c3c3a3"),r.onclick=onClick;var o=document.createElementNS("http://www.w3.org/2000/svg","title");o.setAttribute("name",`tr${a}c${m}`),r.appendChild(o),e.appendChild(r);var s=document.createElementNS("http://www.w3.org/2000/svg","text");s.setAttribute("name",`r${a}c${m}`),s.onclick=onClick,s.textContent="",s.setAttribute("x",t.x+n/2),s.setAttribute("y",t.y+i/2+l.height/2),e.appendChild(s);var c=s.getBBox().width;s.setAttribute("x",t.x+n/2+l.width/2-c/2)}const recoverFull=e=>{let t=[],l=!0;if(!1!==e){for(var n=0;n<localStorage.length;n++){let i=localStorage.key(n);if(i.includes("_p_n")){l=!1;let a=i.split("_p_n");t.push(a[0])}}if(l)return!1;for(let m of(cinimaName=t[0],document.getElementById("roomSelect").innerHTML="",t))document.getElementById("roomSelect").innerHTML+=`<option>${m}</option>`;document.getElementById("roomSelect").innerHTML+=`<option>新建包厢</option>`}document.getElementById("n").value=window.localStorage.getItem(`${cinimaName}_p_n`),document.getElementById("m").value=window.localStorage.getItem(`${cinimaName}_p_m`),document.getElementById("room").value=cinimaName,document.getElementById("aisleRow").value=window.localStorage.getItem(`${cinimaName}_p_row`),document.getElementById("aislecol").value=window.localStorage.getItem(`${cinimaName}_p_col`);let r="",o=!1;for(var n=0;n<localStorage.length;n++){let s=localStorage.key(n);if(s.startsWith(cinimaName)){let c=s.split("_z_");if(!c[1])continue;r+=`<option>${c[1]}</option>`,!1==o&&(recover(s),o=!0)}}r+="<option>新建时刻</option>";let g=document.getElementById("timeSelect");return g.innerHTML=r,timeName=g.options[g.selectedIndex].innerHTML,document.getElementById("timeline").value=timeName,!0};function generateGrid(e){if(e&&(window.localStorage.setItem(`${cinimaName}_p_n`,document.getElementById("n").value),window.localStorage.setItem(`${cinimaName}_p_row`,document.getElementById("aisleRow").value),window.localStorage.setItem(`${cinimaName}_p_m`,document.getElementById("m").value),window.localStorage.setItem(`${cinimaName}_p_col`,document.getElementById("aislecol").value)),!0!==e&&recoverFull(!0))return;var t=document.getElementById("my-svg"),l=parseInt(document.getElementById("n").value),n=parseInt(document.getElementById("m").value),i=document.getElementById("aislecol").value.split(" ").map(e=>parseInt(e)-1),a=document.getElementById("aisleRow").value.split(" ").map(e=>parseInt(e)-1);for(t.getBoundingClientRect().width,t.getBoundingClientRect().height;t.firstChild;)t.removeChild(t.firstChild);let m=0,r=0;for(var o=0;o<l;o++)for(var s=0;s<n;s++){var c={x:100+52*o,y:100+60*s};let g=0;for(;g<i.length&&o>i[g];)c.x+=30,g++;for(g=0;g<a.length&&s>a[g];)c.y+=30,g++;generateNode(t,c,{width:50,height:50},2,10,o,s),m=Math.max(m,c.x+50+100),r=Math.max(r,c.y+50+100)}for(let d=0;d<n;d++){let y={x:5,y:100+60*d+100/3},u=0;for(;u<a.length&&d>a[u];)y.y+=30,u++;generateRow(t,y,`第${n-d}排`)}t.style.width=m,t.style.height=r}document.addEventListener("keydown",function(e){var t=e.which||e.keyCode,l=e.ctrlKey?e.ctrlKey:17===t;if("Delete"===e.key||46===e.keyCode&&selectedSeat.length>0){for(let n of selectedSeat){let i=document.getElementsByName(n.getAttribute("name"));for(;i.length;)i[0].remove()}selectedSeat[0].remove(),selectedSeat=[]}if(86==t&&l){if(console.log("Ctrl+V is pressed."),!copyedSeat||0===selectedSeat.length)return;let a=document.getElementsByName(copyedSeat.getAttribute("name")),m=document.getElementsByName(selectedSeat[0].getAttribute("name"));m[0].style.color=a[0].style.color,m[0].setAttribute("fill",a[0].getAttribute("fill"));var r=m[1].getBBox(),o=r.width;m[1].innerHTML=a[1].innerHTML,r=m[1].getBBox().width;let s=parseFloat(m[1].getAttribute("x"));m[1].setAttribute("x",s+o/2-r/2),m[0].firstChild.innerHTML=a[0].firstChild.innerHTML}else if(67==t&&l){if(0===selectedSeat.length)return;copyedSeat=selectedSeat[0]}else l&&(multiSelect=!0)}),document.addEventListener("keyup",function(e){e.which||e.keyCode,e.ctrlKey&&e.ctrlKey,console.info(multiSelect),multiSelect=!1,console.info(multiSelect)}),generateGrid();
+    let selectedSeat = [];
+    let copyedSeat;
+    let cinimaName = "未命名包厢";
+    let timeName = "未命名时刻";
+    let multiSelect = false;
+    let storedCinemas = {};
 
+    const deleteRoom = () => {
+      const deletes = [];
+      for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          if(name.startsWith(`${cinimaName}_z_`)) {
+            deletes.push(name);
+          }
+      }
+
+      for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          if(name.startsWith(`${cinimaName}_p_`)) {
+            deletes.push(name);
+          }
+      }
+
+      for(const item of deletes) {
+        localStorage.removeItem(item);
+      }
+      location.reload();
+    }
+
+    const deletetime = () => {
+      localStorage.removeItem(`${cinimaName}_z_${timeName}`);
+      let flag = false;
+      for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          if(name.startsWith(`${cinimaName}_z_`)) {
+            flag = true;
+            break;
+          }
+      }
+      if(flag === false) {
+        localStorage.removeItem(`${cinimaName}_p_n`);
+        localStorage.removeItem(`${cinimaName}_p_m`);
+        localStorage.removeItem(`${cinimaName}_p_row`);
+        localStorage.removeItem(`${cinimaName}_p_col`);
+      }
+      alert("删除成功");
+      location.reload();
+    }
+    
+
+    
+    const onClick = (e) => {
+        const ele = e.target;
+        const appendInfo = document.getElementById("appendInfo");
+        const seat = document.getElementById("seatName");
+        if(multiSelect) {
+          const name = e.target.getAttribute("name");
+          const eles = document.getElementsByName(name);
+          selectedSeat.push(eles[0]);
+          eles[0].setAttribute("stroke", "#ed9393");
+          if(selectedSeat.length > 1) {
+            appendInfo.value = "";
+            seat.value = "";
+          } else {
+            const title = document.getElementsByName(`t${selectedSeat[0].getAttribute("name")}`);
+            appendInfo.value = title[0].innerHTML;
+            seat.value = eles[1].innerHTML;
+          }
+          return;
+        }
+        const rects = document.getElementById('my-svg').getElementsByTagName('rect');
+        for(const rect of rects) {
+            rect.setAttribute("stroke", "black");
+        }
+        selectedSeat = [e.target];
+        const name = selectedSeat[0].getAttribute("name");
+        const eles = document.getElementsByName(name);
+        selectedSeat = [eles[0]];
+        seat.value = eles[1].innerHTML;
+        selectedSeat[0].setAttribute("stroke", "#ed9393");
+        const title = document.getElementsByName(`t${selectedSeat[0].getAttribute("name")}`);
+        
+        
+        appendInfo.value = title[0].innerHTML;
+      }
+    
+    const generateTimeline = () => {
+        const text = document.getElementById("timeline").value;
+        const time = document.getElementById("timeSelect");
+        time.options[time.selectedIndex].innerHTML = text;
+        localStorage.removeItem(`${cinimaName}_z_${timeName}`);
+        timeName = text;
+        save();
+    }
+
+    const generateRoom = () => {
+      const text = document.getElementById("room").value;
+      const room = document.getElementById("roomSelect");
+      room.options[room.selectedIndex].innerHTML = text;
+      const deletes = [];
+      for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          const content = localStorage.getItem(name);
+          if(name.startsWith(`${cinimaName}_z_`)) {
+              deletes.push(name);
+              const names = name.split('_z_');
+              localStorage.setItem(`${text}_z_${names[1]}`, content);
+          }
+          if(name.startsWith(`${cinimaName}_p_`)) {
+              deletes.push(name);
+              const names = name.split('_p_');
+              localStorage.setItem(`${text}_p_${names[1]}`, content);
+          }
+      }
+      for(const name of deletes) {
+        localStorage.removeItem(name);
+      }
+
+      cinimaName = text;
+      save();
+    }
+    
+    const save = () => {
+        const rects = document.getElementById('my-svg').getElementsByTagName('rect');
+        for(const rect of rects) {
+            rect.setAttribute("stroke", "black");
+        }
+        window.localStorage.setItem(`${cinimaName}_p_n`, document.getElementById("n").value);
+        window.localStorage.setItem(`${cinimaName}_p_row`, document.getElementById("aisleRow").value);
+        window.localStorage.setItem(`${cinimaName}_p_m`, document.getElementById("m").value);
+        window.localStorage.setItem(`${cinimaName}_p_col`, document.getElementById("aislecol").value);
+        window.localStorage.setItem(`${cinimaName}_z_${timeName}`, document.getElementById('container').innerHTML);
+        alert("保存成功");
+    }
+    
+    const recover = (name) => {
+        document.getElementById('container').innerHTML = window.localStorage.getItem(name);
+        setInterval(()=>{
+            const rects = document.getElementById('my-svg').getElementsByTagName('rect');
+            for(const rect of rects) {
+                rect.onclick = onClick;
+            }
+            
+            const texts = document.getElementById('my-svg').getElementsByTagName('text');
+            for(const text of texts) {
+                if(text.innerHTML && text.innerHTML[0] == '第')continue;
+                text.onclick = onClick;
+            }
+        }, 500);
+
+    }
+
+    const onchangeRoom = (e) => {
+      const title = e.options[e.selectedIndex].innerHTML;
+      save();
+      cinimaName = title;
+      document.getElementById("room").value = title;
+      if(title == "新建包厢") {
+          const u = e.selectedIndex;
+          const newName = `未命名包厢${e.options.length}`;
+          document.getElementById("room").value = newName;
+          cinimaName = newName;
+          
+          const rects = document.getElementById('my-svg').getElementsByTagName('rect');
+          for(const rect of rects) {
+              rect.setAttribute("fill", "#c5c3c3a3");
+              rect.firstChild.innerHTML = "";
+          }
+          
+          const texts = document.getElementById('my-svg').getElementsByTagName('text');
+          for(const text of texts) {
+              if(text.innerHTML && text.innerHTML[0] == '第')continue;
+              text.innerHTML = "";
+          }
+          timeName = '未命名时刻';
+          document.getElementById("roomSelect").value = newName;
+          e.innerHTML = `<option>${newName}</option>` + e.innerHTML;
+          e.selectedIndex = 0;
+
+          const select = document.getElementById("timeSelect");
+          select.innerHTML = '<option>未命名时刻</option><option>新建时刻</option>';
+          document.getElementById("timeline").value = timeName;
+          return;
+      }
+      recoverFull(false);
+
+    }
+    const onchangetime = (e) => {
+        const title = e.options[e.selectedIndex].innerHTML;
+        save();        
+        if(title == "新建时刻") {
+            const u = e.selectedIndex;
+            e.options[e.selectedIndex].innerHTML = `未命名时刻${e.options.length}`;
+            const rects = document.getElementById('my-svg').getElementsByTagName('rect');
+            for(const rect of rects) {
+                rect.setAttribute("fill", "#c5c3c3a3");
+                rect.firstChild.innerHTML = "";
+            }
+            
+            const texts = document.getElementById('my-svg').getElementsByTagName('text');
+            for(const text of texts) {
+                if(text.innerHTML && text.innerHTML[0] == '第')continue;
+                text.innerHTML = "";
+            }
+            timeName = e.options[e.selectedIndex].innerHTML;
+            document.getElementById("timeline").value = e.options[e.selectedIndex].innerHTML;
+            e.innerHTML += `<option>新建时刻</option>`;
+            e.selectedIndex = u;
+            return;
+        }
+        timeName = e.options[e.selectedIndex].innerHTML;
+        document.getElementById("timeline").value = e.options[e.selectedIndex].innerHTML;
+        recover(`${cinimaName}_z_${title}`);
+    }
+    
+    const editName = () => {
+        const text = document.getElementById("seatName").value;
+        if(selectedSeat.length === 0) {
+            return;
+        }
+        for(const ss of selectedSeat) {
+          const name = ss.getAttribute("name");
+          const eles = document.getElementsByName(name);
+          var bbox = eles[1].getBBox();
+          var textWidth = bbox.width;
+          eles[1].innerHTML = text;
+          bbox = eles[1].getBBox().width;
+          const x = parseFloat(eles[1].getAttribute('x'));
+          eles[1].setAttribute("x", x+textWidth/2-bbox/2);
+        }
+    }
+    
+    const editAppend = () => {
+        const text = document.getElementById("appendInfo").value;
+        if(selectedSeat.length === 0) {
+            return;
+        }
+        for(const ss of selectedSeat) {
+          const name = ss.getAttribute("name");
+          const eles = document.getElementsByName(`t${name}`);
+
+          eles[0].innerHTML = text;
+        }
+    }
+    
+    const pickcolor = (e) => {
+        console.info(e.style.backgroundColor);
+        if(selectedSeat.length === 0) {
+            return;
+        }
+        for(const ss of selectedSeat) {
+          const name = ss.getAttribute("name");
+          const eles = document.getElementsByName(name);
+          eles[0].setAttribute("fill", e.style.backgroundColor);
+        }
+    }
+    
+    function generateRow(svg, position, message) {
+      var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.textContent = message;
+      text.setAttribute("x", position.x);
+      text.setAttribute("y", position.y);
+      svg.appendChild(text);
+      
+    }
+    
+    function generateNode(svg, position, size, gapRow, gapCol, r, c) {
+      var rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+      rect.setAttribute("x", position.x + gapRow / 2);
+      rect.setAttribute("y", position.y + gapCol / 2);
+      rect.setAttribute("width", size.width - gapRow);
+      rect.setAttribute("height", size.height );
+      rect.setAttribute("rx", 10);
+      rect.setAttribute("name", `r${r}c${c}`);
+      rect.setAttribute("stroke-width", 3);
+      rect.setAttribute("stroke", "black");
+      rect.setAttribute("fill", "#c5c3c3a3");
+
+      rect.onclick = onClick;
+      var tooltip = document.createElementNS("http://www.w3.org/2000/svg", "title");
+      tooltip.setAttribute("name", `tr${r}c${c}`);
+
+      rect.appendChild(tooltip);
+      svg.appendChild(rect);
+      
+      
+      var text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      text.setAttribute("name", `r${r}c${c}`);
+      text.onclick = onClick;
+
+
+      text.textContent = "";
+      text.setAttribute("x", position.x + gapRow / 2);
+      text.setAttribute("y", position.y + gapCol / 2 + size.height / 2);
+      
+      svg.appendChild(text);
+      var bbox = text.getBBox();
+      var textWidth = bbox.width;
+      text.setAttribute("x", position.x + gapRow / 2 + size.width/2-textWidth/2);
+      
+    }
+
+    const recoverFull = (recoverroom) => {
+      const cinemas = [];
+      let empty = true;
+      if(recoverroom !== false) {
+        for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          if(name.includes("_p_n")) {
+              empty = false;
+              const names = name.split('_p_n');
+              cinemas.push(names[0]);
+          }
+        }
+        if(empty) {
+          return false;
+        }
+        cinimaName = cinemas[0];
+        document.getElementById("roomSelect").innerHTML = "";
+        for(const cinema of cinemas) {
+          document.getElementById("roomSelect").innerHTML += `<option>${cinema}</option>`;
+        }
+        document.getElementById("roomSelect").innerHTML += `<option>新建包厢</option>`;
+      }
+
+      document.getElementById("n").value = window.localStorage.getItem(`${cinimaName}_p_n`);
+      document.getElementById("m").value = window.localStorage.getItem(`${cinimaName}_p_m`);
+      document.getElementById("room").value = cinimaName;
+
+      document.getElementById("aisleRow").value = window.localStorage.getItem(`${cinimaName}_p_row`);
+      document.getElementById("aislecol").value = window.localStorage.getItem(`${cinimaName}_p_col`);
+      let ops = '';
+      let flag = false;
+      for (var i = 0; i < localStorage.length; i++){
+          const name = localStorage.key(i);
+          if(name.startsWith(cinimaName)) {
+              const names = name.split('_z_');
+              if(!names[1])continue;
+              ops += `<option>${names[1]}</option>`;
+              if(flag == false) {
+                  recover(name);
+                  flag = true;
+              }
+          }
+      }
+      ops += '<option>新建时刻</option>';
+      const select = document.getElementById("timeSelect");
+      select.innerHTML = ops;
+      timeName = select.options[select.selectedIndex].innerHTML;
+
+
+      document.getElementById("timeline").value = timeName;
+      return true;
+    }
+
+    function generateGrid(changed) {
+      if(changed) {
+        window.localStorage.setItem(`${cinimaName}_p_n`, document.getElementById("n").value);
+        window.localStorage.setItem(`${cinimaName}_p_row`, document.getElementById("aisleRow").value);
+        window.localStorage.setItem(`${cinimaName}_p_m`, document.getElementById("m").value);
+        window.localStorage.setItem(`${cinimaName}_p_col`, document.getElementById("aislecol").value);
+      }
+      if(changed !== true && recoverFull(true)) {
+        return;
+      }
+      var svg = document.getElementById("my-svg");
+      var n = parseInt(document.getElementById("n").value);
+      var m = parseInt(document.getElementById("m").value);
+      var aislecol = document.getElementById("aislecol").value.split(" ").map(x=>parseInt(x)-1);
+      var aisleRow = document.getElementById("aisleRow").value.split(" ").map(x=>parseInt(x)-1);;
+      var width = svg.getBoundingClientRect().width;
+      var height = svg.getBoundingClientRect().height;
+      var rectWidth = 50;
+      var rectHeight = 50;
+      var marginLeft = 100;
+      var marginRight = 100;
+      var gapRow = 2;
+      var gapCol = 10;
+
+      // Clear the SVG element before generating the grid
+      while (svg.firstChild) {
+        svg.removeChild(svg.firstChild);
+      }
+      
+      let farRight = 0;
+      let farBottom = 0;
+
+      for (var i = 0; i < n; i++) {
+        for (var j = 0; j < m; j++) {
+          var position = { x: marginLeft + i * (rectWidth + gapRow), y: marginRight+j * (rectHeight + gapCol) };
+          let index = 0;
+          while(index < aislecol.length && i > aislecol[index]) {
+            position.x += 30;
+            index++;
+          }
+          index = 0;
+          while(index < aisleRow.length && j > aisleRow[index]) {
+            position.y += 30;
+            index++;
+          }
+
+          var size = { width: rectWidth, height: rectHeight };
+          generateNode(svg, position, size, gapRow, gapCol, i, j);
+          farRight = Math.max(farRight, position.x + rectWidth + marginLeft);
+          farBottom = Math.max(farBottom, position.y + rectHeight + marginRight);
+        }
+      }
+      for(let i = 0; i <m; i++) {
+        const position = {x: 5, y: marginRight+i * (rectHeight + gapCol)+rectHeight*2/3};
+        let index = 0;
+        while(index < aisleRow.length && i > aisleRow[index]) {
+            position.y += 30;
+            index++;
+        }
+        generateRow(svg, position, `第${i+1}排`);
+      }
+      svg.style.width = farRight;
+      svg.style.height = farBottom;
+      
+    }
+    
+    document.addEventListener('keydown', function(event) {
+      var key = event.which || event.keyCode;
+      var ctrl = event.ctrlKey ? event.ctrlKey : ((key === 17)? true : false);
+
+      if (event.key === 'Delete' || event.keyCode === 46 && selectedSeat.length > 0) {
+        for(const ss of selectedSeat) {
+          const selecteles = document.getElementsByName(ss.getAttribute("name"));
+          while(selecteles.length) {
+            selecteles[0].remove();
+          }
+        }
+        selectedSeat[0].remove();
+        selectedSeat = [];
+      }
+      if (key == 86 && ctrl) {
+        // print in console.
+        console.log("Ctrl+V is pressed.");
+        if(!copyedSeat)return;
+        if(selectedSeat.length === 0)return;
+        const copyeles = document.getElementsByName(copyedSeat.getAttribute("name"));
+        const selecteles = document.getElementsByName(selectedSeat[0].getAttribute("name"));
+        selecteles[0].style.color = copyeles[0].style.color;
+        selecteles[0].setAttribute("fill", copyeles[0].getAttribute("fill"));
+        
+        
+        var bbox = selecteles[1].getBBox();
+        var textWidth = bbox.width;
+        selecteles[1].innerHTML = copyeles[1].innerHTML;
+        bbox = selecteles[1].getBBox().width;
+        const x = parseFloat(selecteles[1].getAttribute('x'));
+        selecteles[1].setAttribute("x", x+textWidth/2-bbox/2);
+        
+        selecteles[0].firstChild.innerHTML = copyeles[0].firstChild.innerHTML;
+        
+        
+      }
+      else if (key == 67 && ctrl) {
+        if(selectedSeat.length === 0)return;
+        copyedSeat = selectedSeat[0];
+      } else if (ctrl) {
+        multiSelect = true;
+      }
+    });
+
+    document.addEventListener('keyup', function(event) {
+      var key = event.which || event.keyCode;
+      var ctrl = event.ctrlKey ? event.ctrlKey : ((key === 17)? true : false);
+      console.info(multiSelect);
+      multiSelect = false;
+      console.info(multiSelect);
+    });
+    generateGrid();
+
+    const generateExcel = () => {
+      let data = [[]];
+      const n = document.getElementById("n").value;
+      const m = document.getElementById("m").value;
+      for(let i = 0; i < m; i++) {
+        let line = [`第${i+1}排`];
+        for(let j = 0; j < n; j++) {
+          const seat = document.getElementsByName(`r${i}c${j}`);
+          if(seat.length < 2) {
+            line.push("");
+            continue;
+          }
+          line.push(seat[1].textContent);
+        }
+        data.push(line);
+      }
+      var workbook = XLSX.utils.book_new();
+      var worksheet = XLSX.utils.aoa_to_sheet(data);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+      var excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
+      var blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      var link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${cinimaName}_${timeName}.xlsx`;
+      link.click();
+    }
   </script>
 </html>
