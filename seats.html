@@ -564,7 +564,7 @@
       for(let i = 0; i < m; i++) {
         let line = [`第${i+1}排`];
         for(let j = 0; j < n; j++) {
-          const seat = document.getElementsByName(`r${i}c${j}`);
+          const seat = document.getElementsByName(`r${j}c${i}`);
           if(seat.length < 2) {
             line.push("");
             continue;
