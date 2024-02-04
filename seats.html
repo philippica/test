@@ -38,14 +38,14 @@
 </div>
 
 <div>
-  <span>选择时刻</span>
+  <span>选择场次</span>
   <select id="timeSelect" onchange="onchangetime(this)">
-    <option>未命名时刻</option>
-    <option>新建时刻</option>
+    <option>未命名场次</option>
+    <option>新建场次</option>
   </select>
-  <span>当前时刻</span>
-  <input id="timeline" value="未命名时刻" onchange="generateTimeline()">
-  <span><button onclick="deletetime()">删除当前时刻</button></span>
+  <span>当前场次</span>
+  <input id="timeline" value="未命名场次" onchange="generateTimeline()">
+  <span><button onclick="deletetime()">删除当前场次</button></span>
 </div>
 
 
@@ -88,7 +88,7 @@
     let selectedSeat = [];
     let copyedSeat;
     let cinimaName = "未命名包厢";
-    let timeName = "未命名时刻";
+    let timeName = "未命名场次";
     let multiSelect = false;
     let storedCinemas = {};
 
@@ -259,13 +259,13 @@
               if(text.innerHTML && text.innerHTML[0] == '第')continue;
               text.innerHTML = "";
           }
-          timeName = '未命名时刻';
+          timeName = '未命名场次';
           document.getElementById("roomSelect").value = newName;
           e.innerHTML = `<option>${newName}</option>` + e.innerHTML;
           e.selectedIndex = 0;
 
           const select = document.getElementById("timeSelect");
-          select.innerHTML = '<option>未命名时刻</option><option>新建时刻</option>';
+          select.innerHTML = '<option>未命名场次</option><option>新建场次</option>';
           document.getElementById("timeline").value = timeName;
           return;
       }
@@ -275,9 +275,9 @@
     const onchangetime = (e) => {
         const title = e.options[e.selectedIndex].innerHTML;
         save();        
-        if(title == "新建时刻") {
+        if(title == "新建场次") {
             const u = e.selectedIndex;
-            e.options[e.selectedIndex].innerHTML = `未命名时刻${e.options.length}`;
+            e.options[e.selectedIndex].innerHTML = `未命名场次${e.options.length}`;
             const rects = document.getElementById('my-svg').getElementsByTagName('rect');
             for(const rect of rects) {
                 rect.setAttribute("fill", "#c5c3c3a3");
@@ -291,7 +291,7 @@
             }
             timeName = e.options[e.selectedIndex].innerHTML;
             document.getElementById("timeline").value = e.options[e.selectedIndex].innerHTML;
-            e.innerHTML += `<option>新建时刻</option>`;
+            e.innerHTML += `<option>新建场次</option>`;
             e.selectedIndex = u;
             return;
         }
@@ -430,7 +430,7 @@
               }
           }
       }
-      ops += '<option>新建时刻</option>';
+      ops += '<option>新建场次</option>';
       const select = document.getElementById("timeSelect");
       select.innerHTML = ops;
       timeName = select.options[select.selectedIndex].innerHTML;
